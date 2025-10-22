@@ -23,7 +23,19 @@ test_that("soft_c returns same values as R version", {
 
 # Do at least 2 tests for lasso objective function below. You are checking output agreements on at least 2 separate inputs
 #################################################
-
+test_that("lasso_c returns same values as R version", {
+  set.seed(12)
+  X <- matrix(rnorm(10 * 2), 10, 2)
+  Y <- rnorm(10)
+  beta <- 1:2
+  lambda <- 2
+  expect_equal(lasso_c(X,Y, beta, lambda), lasso(X,Y, beta, lambda))
+  X <- matrix(rnorm(20 * 5), 20, 5)
+  Y <- rnorm(20)
+  beta <- rnorm(5)
+  lambda <- 0.5
+  expect_equal(lasso_c(X,Y, beta, lambda), lasso(X,Y, beta, lambda))
+})
 
 # Do at least 2 tests for fitLASSOstandardized function below. You are checking output agreements on at least 2 separate inputs
 #################################################
