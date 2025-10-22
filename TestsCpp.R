@@ -16,6 +16,9 @@ test_that("soft_c returns same values as R version", {
   expect_equal(soft(5,3), soft_c(5,3))
   expect_equal(soft(5,-4), soft_c(5,-4))
   expect_equal(soft(5,10), soft_c(5,10))
+  expect_equal(soft(-5,10), soft_c(-5,10))
+  expect_equal(soft(0,10), soft_c(0,10))
+  expect_equal(soft(0,0), soft_c(0,0))
 })
 
 # Do at least 2 tests for lasso objective function below. You are checking output agreements on at least 2 separate inputs
