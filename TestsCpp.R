@@ -30,6 +30,8 @@ test_that("lasso_c returns same values as R version", {
   beta <- 1:2
   lambda <- 2
   expect_equal(lasso_c(X,Y, beta, lambda), lasso(X,Y, beta, lambda))
+  
+  
   X <- matrix(rnorm(20 * 5), 20, 5)
   Y <- rnorm(20)
   beta <- rnorm(5)
