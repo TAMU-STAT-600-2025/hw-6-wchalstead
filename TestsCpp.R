@@ -41,6 +41,32 @@ test_that("lasso_c returns same values as R version", {
 
 # Do at least 2 tests for fitLASSOstandardized function below. You are checking output agreements on at least 2 separate inputs
 #################################################
+test_that("fitLassostandardized returns same estimates in C and R", {
+  set.seed(12)
+  X <- matrix(rnorm(50), 50)
+  Y <- X %*% c(10)
+  stand <- standardizeXY(X, Y)
+  Xtilde <- stand$Xtilde
+  Ytilde <- stand$Ytilde
+  
+  expect_equal(
+    fitLASSOstandardized(Xtilde, Ytilde, lambda = 0)$beta,
+    as.vector(fitLASSOstandardized_c(Xtilde, Ytilde, lambda = 0, c(0)))
+  )
+  
+  
+  set.seed(13)
+  X <- matrix(rnorm(50 * 3), 50, 3)
+  Y <- X %*% c(10, 3, 6)
+  stand <- standardizeXY(X, Y)
+  Xtilde <- stand$Xtilde
+  Ytilde <- stand$Ytilde
+  
+  expect_equal(
+    fitLASSOstandardized(Xtilde, Ytilde, lambda = 1)$beta,
+    as.vector(fitLASSOstandardized_c(Xtilde, Ytilde, lambda = 1, c(0,0,0)))
+  )
+})
 
 # Do microbenchmark on fitLASSOstandardized vs fitLASSOstandardized_c
 ######################################################################
