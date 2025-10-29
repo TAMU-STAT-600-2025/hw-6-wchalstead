@@ -19,6 +19,7 @@ test_that("soft_c returns same values as R version", {
   expect_equal(soft(-5,10), soft_c(-5,10))
   expect_equal(soft(0,10), soft_c(0,10))
   expect_equal(soft(0,0), soft_c(0,0))
+  expect_equal(soft(-1,-1), soft_c(-1,-1))
 })
 
 # Do at least 2 tests for lasso objective function below. You are checking output agreements on at least 2 separate inputs
@@ -37,6 +38,12 @@ test_that("lasso_c returns same values as R version", {
   beta <- rnorm(5)
   lambda <- 0.5
   expect_equal(lasso_c(X,Y, beta, lambda), lasso(X,Y, beta, lambda))
+  
+  X <- matrix(rnorm(100 * 50), 100, 50)
+  Y <- rnorm(100)
+  beta <- rnorm(50)
+  lambda <- 1
+  expect_equal(lasso_c(X,Y, beta, lambda), lasso(X,Y, beta, lambda))
 })
 
 # Do at least 2 tests for fitLASSOstandardized function below. You are checking output agreements on at least 2 separate inputs
@@ -44,14 +51,14 @@ test_that("lasso_c returns same values as R version", {
 test_that("fitLassostandardized returns same estimates in C and R", {
   set.seed(12)
   X <- matrix(rnorm(50), 50)
-  Y <- X %*% c(10)
+  Y <- X %*% rnorm(1)
   stand <- standardizeXY(X, Y)
   Xtilde <- stand$Xtilde
   Ytilde <- stand$Ytilde
   
   expect_equal(
     fitLASSOstandardized(Xtilde, Ytilde, lambda = 0)$beta,
-    as.vector(fitLASSOstandardized_c(Xtilde, Ytilde, lambda = 0, c(0)))
+    as.vector(fitLASSOstandardized_c(Xtilde, Ytilde, lambda = 0, c(1)))
   )
   
   
@@ -65,6 +72,30 @@ test_that("fitLassostandardized returns same estimates in C and R", {
   expect_equal(
     fitLASSOstandardized(Xtilde, Ytilde, lambda = 1)$beta,
     as.vector(fitLASSOstandardized_c(Xtilde, Ytilde, lambda = 1, c(0,0,0)))
+  )
+  
+  set.seed(13)
+  X <- matrix(rnorm(50 * 3), 50, 3)
+  Y <- X %*% c(-1,-2,-3)
+  stand <- standardizeXY(X, Y)
+  Xtilde <- stand$Xtilde
+  Ytilde <- stand$Ytilde
+  
+  expect_equal(
+    fitLASSOstandardized(Xtilde, Ytilde, lambda = 1)$beta,
+    as.vector(fitLASSOstandardized_c(Xtilde, Ytilde, lambda = 1, c(0,0,0)))
+  )
+  
+  set.seed(11)
+  X <- matrix(rnorm(100 * 10), 100, 10)
+  Y <- X %*% rnorm(10)
+  stand <- standardizeXY(X, Y)
+  Xtilde <- stand$Xtilde
+  Ytilde <- stand$Ytilde
+  
+  expect_equal(
+    fitLASSOstandardized(Xtilde, Ytilde, lambda = 0.75)$beta,
+    as.vector(fitLASSOstandardized_c(Xtilde, Ytilde, lambda = 0.75, rep(0, 10)))
   )
 })
 
@@ -82,7 +113,7 @@ microbenchmark::microbenchmark(
   fitLASSOstandardized_c(Xtilde, Ytilde, lambda = 1, c(0,0,0))
 )
 # Median R time 226.95 microseconds
-# Median C time 13.10 microseconds
+# Median C++ time 13.10 microseconds
 
 
 # Do at least 2 tests for fitLASSOstandardized_seq function below. You are checking output agreements on at least 2 separate inputs
@@ -107,6 +138,16 @@ test_that("fitLASSOstandardized_seq_c works properly",{
   out2 <- fitLASSOstandardized_seq(Xtilde, Ytilde)
   
   expect_equal(fitLASSOstandardized_seq_c(Xtilde, Ytilde, out2$lambda_seq), out2$beta_mat)
+  
+  set.seed(17)
+  X <- matrix(rnorm(100 * 50), 100, 50)
+  Y <- X %*% rnorm(50)
+  stand <- standardizeXY(X, Y)
+  Xtilde <- stand$Xtilde
+  Ytilde <- stand$Ytilde
+  out2 <- fitLASSOstandardized_seq(Xtilde, Ytilde)
+  
+  expect_equal(fitLASSOstandardized_seq_c(Xtilde, Ytilde, out2$lambda_seq), out2$beta_mat)
 })
 # Do microbenchmark on fitLASSOstandardized_seq vs fitLASSOstandardized_seq_c
 ######################################################################
@@ -122,7 +163,7 @@ microbenchmark::microbenchmark(
   fitLASSOstandardized_seq_c(Xtilde, Ytilde, out2$lambda_seq)
 )
 # R version has median time of 10800.25 microseconds
-# C version has median time of 388.20 microseconds
+# C++ version has median time of 388.20 microseconds
 
 
 # Tests on riboflavin data
@@ -140,8 +181,10 @@ out <- standardizeXY(riboflavin$x, riboflavin$y)
 outl <- fitLASSOstandardized_seq(out$Xtilde, out$Ytilde, n_lambda = 30)
 
 # The code below should assess your speed improvement on riboflavin data
-microbenchmark(
+microbenchmark::microbenchmark(
   fitLASSOstandardized_seq(out$Xtilde, out$Ytilde, outl$lambda_seq),
   fitLASSOstandardized_seq_c(out$Xtilde, out$Ytilde, outl$lambda_seq),
   times = 10
 )
+# Median time for R is 2806.91395
+# Median time for C++ is 69.10695

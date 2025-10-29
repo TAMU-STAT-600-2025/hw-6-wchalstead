@@ -6,7 +6,7 @@ using namespace Rcpp;
 // [[Rcpp::export]]
 double soft_c(double a, double lambda){
   // Your function code goes here
-  return ((a > 0) - (a < 0)) * std::max(a - lambda, 0.0);
+  return ((a > 0) - (a < 0)) * std::max(abs(a) - lambda, 0.0);
 }
 
 // Lasso objective function, returns scalar
