@@ -57,5 +57,18 @@ arma::colvec fitLASSOstandardized_c(const arma::mat& Xtilde, const arma::colvec&
 // [[Rcpp::export]]
 arma::mat fitLASSOstandardized_seq_c(const arma::mat& Xtilde, const arma::colvec& Ytilde, const arma::colvec& lambda_seq, double eps = 0.001){
   // Your function code goes here
-  return 0;
+  // Initialize n and p
+  double n = Xtilde.n_rows;
+  double p = Xtilde.n_cols;
+  double nlambda = lambda_seq.n_rows;
+  
+  // Initialize matrix beta
+  arma::mat beta(p, nlambda, arma::fill::zeros);
+  
+  // Main loop
+  for (int j = 0; j < nlambda; j++){
+    beta.col(j) = fitLASSOstandardized_c(Xtilde, Ytilde, as_scalar(lambda_seq.row(j)), beta.col(std::max(j - 1, 0)), eps);
+  }
+  
+  return beta;
 }

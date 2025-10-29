@@ -70,12 +70,60 @@ test_that("fitLassostandardized returns same estimates in C and R", {
 
 # Do microbenchmark on fitLASSOstandardized vs fitLASSOstandardized_c
 ######################################################################
+set.seed(14)
+X <- matrix(rnorm(50 * 3), 50, 3)
+Y <- X %*% c(10, 3, 6)
+stand <- standardizeXY(X, Y)
+Xtilde <- stand$Xtilde
+Ytilde <- stand$Ytilde
+
+microbenchmark::microbenchmark(
+  fitLASSOstandardized(Xtilde, Ytilde, lambda = 1),
+  fitLASSOstandardized_c(Xtilde, Ytilde, lambda = 1, c(0,0,0))
+)
+# Median R time 226.95 microseconds
+# Median C time 13.10 microseconds
+
 
 # Do at least 2 tests for fitLASSOstandardized_seq function below. You are checking output agreements on at least 2 separate inputs
 #################################################
-
+test_that("fitLASSOstandardized_seq_c works properly",{
+  set.seed(15)
+  X <- matrix(rnorm(50 * 3), 50, 3)
+  Y <- X %*% c(10, 3, 6)
+  stand <- standardizeXY(X, Y)
+  Xtilde <- stand$Xtilde
+  Ytilde <- stand$Ytilde
+  out1 <- fitLASSOstandardized_seq(Xtilde, Ytilde)
+  
+  expect_equal(fitLASSOstandardized_seq_c(Xtilde, Ytilde, out1$lambda_seq), out1$beta_mat)
+  
+  set.seed(16)
+  X <- matrix(rnorm(100 * 5), 100, 5)
+  Y <- X %*% c(10, 3, 6, 4, 2)
+  stand <- standardizeXY(X, Y)
+  Xtilde <- stand$Xtilde
+  Ytilde <- stand$Ytilde
+  out2 <- fitLASSOstandardized_seq(Xtilde, Ytilde)
+  
+  expect_equal(fitLASSOstandardized_seq_c(Xtilde, Ytilde, out2$lambda_seq), out2$beta_mat)
+})
 # Do microbenchmark on fitLASSOstandardized_seq vs fitLASSOstandardized_seq_c
 ######################################################################
+set.seed(16)
+X <- matrix(rnorm(100 * 5), 100, 5)
+Y <- X %*% c(10, 3, 6, 4, 2)
+stand <- standardizeXY(X, Y)
+Xtilde <- stand$Xtilde
+Ytilde <- stand$Ytilde
+out2 <- fitLASSOstandardized_seq(Xtilde, Ytilde)
+microbenchmark::microbenchmark(
+  fitLASSOstandardized_seq(Xtilde, Ytilde),
+  fitLASSOstandardized_seq_c(Xtilde, Ytilde, out2$lambda_seq)
+)
+# R version has median time of 10800.25 microseconds
+# C version has median time of 388.20 microseconds
+
 
 # Tests on riboflavin data
 ##########################
