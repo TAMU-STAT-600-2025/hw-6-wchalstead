@@ -186,5 +186,5 @@ microbenchmark::microbenchmark(
   fitLASSOstandardized_seq_c(out$Xtilde, out$Ytilde, outl$lambda_seq),
   times = 10
 )
-# Median time for R is 2806.91395
-# Median time for C++ is 69.10695
+# Median time for R is 2806.91395 milliseconds
+# Median time for C++ is 69.10695 milliseconds
